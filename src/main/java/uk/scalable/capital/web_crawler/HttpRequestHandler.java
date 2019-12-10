@@ -9,8 +9,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 public class HttpRequestHandler {
+
+    private final static Logger LOGGER = Logger.getLogger(HttpRequestHandler.class.getName());
     public String getPageSource(String url) {
         StringBuilder response = new StringBuilder();
         try {
@@ -27,8 +30,10 @@ public class HttpRequestHandler {
                 httpClient.setRequestProperty( "Host", host );
 
             int responseCode = httpClient.getResponseCode();
-            System.out.println("\nSending 'GET' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
+
+            LOGGER.info("\nSending 'GET' request to URL : " + url);
+
+            LOGGER.info("Response Code : " + responseCode);
 
 
             try (BufferedReader in = new BufferedReader(
@@ -41,13 +46,12 @@ public class HttpRequestHandler {
                 }
             }
 
-        } catch (
-                IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
         catch( URISyntaxException e )
         {
-            e.printStackTrace();
+            LOGGER.severe(e.getMessage());
         }
 
         return response.toString();

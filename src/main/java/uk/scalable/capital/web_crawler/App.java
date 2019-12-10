@@ -10,6 +10,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 
+import static java.util.Comparator.reverseOrder;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.*;
+
 /**
  * Web Crawler
  *
@@ -58,7 +62,8 @@ public class App
         HttpRequestHandler httpRequestHandler = new HttpRequestHandler();
         List<String> webPages = SpiderHub.generateSpiders( links );
 
-        Map<String, Integer> libNames = new HashMap<>(  );
+        List<String> libNames = new ArrayList<>();
+        Map<String, Integer> libNames1 = new HashMap<>();
         for(String webPage: webPages)
         {
             Document doc1 = Jsoup.parse( webPage );
@@ -70,15 +75,30 @@ public class App
                     String jsLink = element.attr( "src" );
                     String libName = jsLink.substring( jsLink.lastIndexOf( '/' )+1 );
                     System.out.println( jsLink );
-                    int count = libNames.containsKey( libName )?libNames.get( libName ):0;
-                    libNames.put(libName, count + 1);
+                    libNames.add(libName);
+                    int count = libNames1.containsKey(libName)?libNames1.get(libName):0;
+                    libNames1.put(libName, count+1);
                 }
             }
         }
 
         // Step 4: Print top 5 most used libraries to standard output
-        for (Map.Entry<String, Integer> entry : libNames.entrySet()) {
+        for (Map.Entry<String, Integer> entry : libNames1.entrySet()) {
             System.out.println(entry.getKey() + ":" + entry.getValue().toString());
         }
+        NameDecoder docoder = new NameDecoder();
+        libNames = docoder.decodeNames(libNames); // for bonus steps
+        List<String> result = libNames.stream()
+                //.map(String::toLowerCase)
+                .collect(groupingBy(identity(), counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Long> comparingByValue(reverseOrder()).thenComparing(Map.Entry.comparingByKey()))
+                .limit(5)
+                .map(Map.Entry::getKey)
+                .collect(toList());
+
+        System.out.println("\nResults:\n");
+        System.out.println(result);
+        System.exit(0);
     }
 }
