@@ -1,4 +1,4 @@
-package uk.scalable.capital.web_crawler;
+package com.sc.crawler;
 
 import static org.junit.Assert.assertTrue;
 

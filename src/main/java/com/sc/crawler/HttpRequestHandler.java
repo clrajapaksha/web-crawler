@@ -1,4 +1,4 @@
-package uk.scalable.capital.web_crawler;
+package com.sc.crawler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,11 +9,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HttpRequestHandler {
 
-    private final static Logger LOGGER = Logger.getLogger(HttpRequestHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HttpRequestHandler.class.getName());
     public String getPageSource(String url) {
         StringBuilder response = new StringBuilder();
         try {
@@ -31,9 +32,9 @@ public class HttpRequestHandler {
 
             int responseCode = httpClient.getResponseCode();
 
-            LOGGER.info("\nSending 'GET' request to URL : " + url);
+            LOGGER.log(Level.INFO,"Sending 'GET' request to URL : {0}" , url);
 
-            LOGGER.info("Response Code : " + responseCode);
+            LOGGER.log(Level.INFO,"Response Code : {0}", responseCode);
 
 
             try (BufferedReader in = new BufferedReader(
@@ -51,7 +52,7 @@ public class HttpRequestHandler {
         }
         catch( URISyntaxException e )
         {
-            LOGGER.severe(e.getMessage());
+            LOGGER.log(Level.SEVERE, e.getMessage());
         }
 
         return response.toString();
@@ -59,10 +60,8 @@ public class HttpRequestHandler {
 
     public CompletableFuture<String> getPageSourceAsync( String url, Executor executor )
     {
-        CompletableFuture<String> responseFuture = CompletableFuture.supplyAsync( () -> {
-            return this.getPageSource( url );
-        }, executor );
-        return responseFuture;
+        return CompletableFuture.supplyAsync( () -> this.getPageSource( url ), executor );
+
     }
 
 }

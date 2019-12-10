@@ -1,6 +1,4 @@
-package uk.scalable.capital.web_crawler;
-
-import com.sun.imageio.stream.StreamFinalizer;
+package com.sc.crawler;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +13,7 @@ public class NameDecoder {
      * Vue -
      */
 
-    public Map<String, String> nameMap = new HashMap<>();
+    private Map<String, String> nameMap = new HashMap<>();
     public NameDecoder()
     {
         nameMap.put("jquery", "jQuery");
@@ -33,18 +31,17 @@ public class NameDecoder {
 
     public List<String> decodeNames(List<String> libs)
     {
-        List<String> names = libs.stream().map( x -> {
-            for(String key: nameMap.keySet())
+        return libs.stream().map( x -> {
+            for(Map.Entry entry: nameMap.entrySet())
             {
-                if( x.contains(key) ) {
-                    x = nameMap.get(key);
+                if( x.contains(entry.getKey().toString()) ) {
+                    x = nameMap.get(entry.getKey().toString());
                     break;
                 }
             }
             return x;
         }).collect(Collectors.toList());
 
-        return names;
     }
 
 }
