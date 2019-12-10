@@ -8,9 +8,7 @@ import org.jsoup.select.Elements;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Web Crawler
@@ -49,7 +47,8 @@ public class App
             if(link.startsWith("/url?q=")) {
                 String url = link.substring(7);
                 url = url.substring(0, url.indexOf("&sa="));
-                links.add(url);
+                if(!url.startsWith( "https://accounts.google.com/ServiceLogin" ))
+                    links.add(url);
                 System.out.println(url);
             }
         }
@@ -57,18 +56,29 @@ public class App
 
         // Step 3: Download the respective pages and extract the names of Javascript libraries used in them
         HttpRequestHandler httpRequestHandler = new HttpRequestHandler();
-        String webPage = httpRequestHandler.getPageSource(links.get(0));
-        Document doc1 = Jsoup.parse(webPage);
-        Elements elements1 = doc1.getElementsByTag("script");
-        for(Element element: elements1)
+        List<String> webPages = SpiderHub.generateSpiders( links );
+
+        Map<String, Integer> libNames = new HashMap<>(  );
+        for(String webPage: webPages)
         {
-            if(element.attr("src").startsWith("http") && element.attr("src").endsWith(".js"))
+            Document doc1 = Jsoup.parse( webPage );
+            Elements elements1 = doc1.getElementsByTag( "script" );
+            for( Element element : elements1 )
             {
-                System.out.println(element.attr("src"));
+                if( element.attr( "src" ).startsWith( "http" ) && element.attr( "src" ).endsWith( ".js" ) )
+                {
+                    String jsLink = element.attr( "src" );
+                    String libName = jsLink.substring( jsLink.lastIndexOf( '/' )+1 );
+                    System.out.println( jsLink );
+                    int count = libNames.containsKey( libName )?libNames.get( libName ):0;
+                    libNames.put(libName, count + 1);
+                }
             }
         }
 
         // Step 4: Print top 5 most used libraries to standard output
-
+        for (Map.Entry<String, Integer> entry : libNames.entrySet()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+        }
     }
 }
